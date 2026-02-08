@@ -1,53 +1,69 @@
-# Detective Quest - Nivel Novato
+# Detective Quest - Nivel Aventureiro
 
 ## Visao Geral
 
-Este projeto implementa, em C, um mapa de uma mansao usando uma arvore binaria. O jogador inicia no Hall de Entrada e explora os comodos escolhendo caminhos para a esquerda ou direita ate encontrar um no-folha ou encerrar a exploracao.
+Este projeto implementa, em C, um mapa de uma mansao usando uma arvore binaria, com coleta de pistas. O jogador inicia no Hall de Entrada, explora os comodos e registra automaticamente as pistas em uma BST para exibicao alfabetica ao final.
 
 ## Objetivo
 
-Aplicar conceitos basicos de estrutura de dados (arvore binaria) com alocacao dinamica e navegacao interativa controlada por entrada do usuario.
+Aplicar conceitos de estrutura de dados (arvore binaria e BST) com alocacao dinamica, navegacao interativa e ordenacao alfabetica das pistas coletadas.
 
 ## Funcionalidades Principais
 
-| Recurso                 | Descricao                                                     |
-| ----------------------- | ------------------------------------------------------------- |
-| Exploracao interativa   | Navegacao por escolhas do usuario (e, d, s).                  |
-| Arvore fixa             | Mapa definido manualmente no codigo, sem insercoes dinamicas. |
-| Encerramento automatico | Termina ao chegar em um no-folha.                             |
-| Mensagens claras        | Saida orienta o usuario durante a exploracao.                 |
+| Recurso               | Descricao                                                              |
+| --------------------- | ---------------------------------------------------------------------- |
+| Exploracao interativa | Navegacao por escolhas do usuario (e, d, s).                           |
+| Arvore fixa           | Mapa definido manualmente no codigo, sem insercoes dinamicas de salas. |
+| Coleta de pistas      | Cada sala pode ter uma pista associada.                                |
+| BST de pistas         | Pistas coletadas sao inseridas em ordem alfabetica.                    |
+| Exibicao ordenada     | Lista final de pistas em ordem alfabetica ao sair da exploracao.       |
+| Mensagens claras      | Saida orienta o usuario durante toda a exploracao.                     |
 
 ## Estrutura do Projeto
 
-- `algoritmos_avancados.c`: implementacao do mapa, exploracao e liberacao de memoria.
+- `desafioAventureiro.c`: implementacao do mapa, coleta de pistas e liberacao de memoria.
 
 ## Arquitetura do Codigo
 
-### Estrutura de Dados
+### Estruturas de Dados
 
 ```c
 /**
  * @brief No da arvore que representa um comodo da mansao.
  */
 typedef struct Sala {
-	char nome[50];
-	struct Sala *esquerda;
-	struct Sala *direita;
+    char nome[50];
+    char pista[120];
+    struct Sala *esquerda;
+    struct Sala *direita;
 } Sala;
+
+/**
+ * @brief No da BST que armazena pistas coletadas.
+ */
+typedef struct PistaNode {
+    char pista[120];
+    struct PistaNode *esquerda;
+    struct PistaNode *direita;
+} PistaNode;
 ```
 
 ### Funcoes Principais
 
-- `criarSala(const char *nome)` - Cria dinamicamente um comodo.
-- `explorarSalas(Sala *raiz)` - Permite a navegacao do jogador.
-- `liberarSalas(Sala *raiz)` - Libera toda a memoria alocada.
+- `criarSala(const char *nome, const char *pista)` - Cria dinamicamente um comodo com ou sem pista.
+- `inserirPista(PistaNode *raiz, const char *pista)` - Insere uma pista na BST de pistas.
+- `explorarSalasComPistas(Sala *raiz, PistaNode **pistasRaiz)` - Controla a navegacao e coleta.
+- `exibirPistas(PistaNode *raiz)` - Imprime a BST em ordem alfabetica.
+- `liberarSalas(Sala *raiz)` - Libera a memoria da arvore de salas.
+- `liberarPistas(PistaNode *raiz)` - Libera a memoria da BST de pistas.
 - `main()` - Monta o mapa inicial e inicia a exploracao.
 
 ## Conceitos Aplicados
 
 - Arvore binaria (nos com ate dois filhos).
+- Arvore binaria de busca (BST) para ordenacao.
 - Alocacao dinamica com `malloc` e `free`.
-- Controle de fluxo com `if`, `else` e `while`.
+- Recursividade para insercao e exibicao ordenada.
 - Modularizacao com funcoes de responsabilidade unica.
 
 ## Como Usar
@@ -55,13 +71,13 @@ typedef struct Sala {
 ### Compilacao (GCC)
 
 ```bash
-gcc -g algoritmos_avancados.c -o algoritmos_avancados.exe
+gcc -g desafioAventureiro.c -o desafioAventureiro.exe
 ```
 
 ### Execucao
 
 ```bash
-./algoritmos_avancados.exe
+./desafioAventureiro.exe
 ```
 
 ### Exemplo de Interacao
@@ -71,11 +87,16 @@ Bem-vindo ao Detective Quest!
 Explore a mansao a partir do Hall de Entrada.
 
 Voce esta em: Hall de Entrada
+Pista encontrada: Chave com simbolo estranho
 Escolha um caminho: (e) esquerda, (d) direita, (s) sair: e
 Voce esta em: Sala de Estar
-Escolha um caminho: (e) esquerda, (d) direita, (s) sair: d
-Voce esta em: Jardim
-Fim do caminho. Nao ha mais salas.
+Pista encontrada: Pegadas de barro fresco
+Escolha um caminho: (e) esquerda, (d) direita, (s) sair: s
+Exploracao encerrada pelo jogador.
+
+Pistas coletadas (ordem alfabetica):
+- Chave com simbolo estranho
+- Pegadas de barro fresco
 ```
 
 ## Requisitos Cumpridos
@@ -84,8 +105,9 @@ Fim do caminho. Nao ha mais salas.
 
 - Arvore binaria criada dinamicamente.
 - Exploracao interativa com entradas `e`, `d` e `s`.
-- Mapa montado automaticamente na `main()`.
-- Impressao do nome de cada sala visitada.
+- Mapa montado na `main()` com pistas por sala.
+- Coleta automatica e armazenamento em BST.
+- Impressao das pistas em ordem alfabetica ao final.
 
 ### Nao Funcionais
 
@@ -95,10 +117,10 @@ Fim do caminho. Nao ha mais salas.
 
 ## Observacoes
 
-- A arvore e montada manualmente no codigo e nao muda em tempo de execucao.
-- Nao ha busca, insercao ou remocao dinamica durante o uso.
+- O usuario deve sair com `s` para ver a lista final de pistas.
+- As arvores nao precisam ser balanceadas.
 
 ---
 
 Status: OK
-Ultima atualizacao: 07/02/2026
+Ultima atualizacao: 08/02/2026
